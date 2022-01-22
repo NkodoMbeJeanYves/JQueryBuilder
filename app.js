@@ -43,13 +43,16 @@ $(document).ready(function() {
         type: 'string',
         id: 'custom',
         field: 'my-operator',
+        operators: ['equal', 'between'],
         label: 'customLabel',
         default_value: 'customValue',
         
         input: function (rule, name) {
           var $container = rule.$el.find('.rule-value-container')
           // $rule.$el is the current li filter item whick contains rule-filter-container, rule-operator-container and rule-value-container
+          rule.data = { field1: 'value1', operator: rule.operator.type }
           console.log(rule, name, rule.$el)
+
           $container.on('change', '[name=' + name + '_1]', function () {
             let h = ''
             switch ($(this).val()) {
@@ -65,7 +68,7 @@ $(document).ready(function() {
             }
 
             $container.find('[name$=_2]')
-              .html(h).css('display', 'block').change()
+              .html(h).css('display', 'block')
               // .val('-1').trigger('change')
             /* if(rule.$el.find('[name$=_2]').length === 0) {
               rule.$el.append('<hr id="hr_1" class="hr_1">')
@@ -105,25 +108,36 @@ $(document).ready(function() {
                 </select>
             </div>
             <div class="col-md-4">
-                <select class="form-control" name="${name}_2" style="display:block;"></select>
+                <select class="form-control" name="${name}_2" style="display:none;"></select>
             </div>
             <div class="col-md-4">
-                <select class="form-control" name="${name}_3" style="display:block;"></select> 
+                <select class="form-control" name="${name}_3" style="display:none;"></select> 
             </div>
           </div>
           `
         },
         valueGetter: function (rule) {
-          return rule.$el.find('.rule-value-container [name$=_1]').val() +
-          '.' + rule.$el.find('.rule-value-container [name$=_2]').val() +
-          '.' + rule.$el.find('.rule-value-container [name$=_3]').val()
+          
+          // return rule.$el.find('.rule-value-container [name$=_1]').val() +
+          // '.' + rule.$el.find('.rule-value-container [name$=_2]').val() +
+          // '.' + rule.$el.find('.rule-value-container [name$=_3]').val()
+          let obj = {}
+            obj['value1'] = rule.$el.find('.rule-value-container [name$=_1]').val()
+            obj['value2'] = rule.$el.find('.rule-value-container [name$=_2]').val()
+            obj['value3'] = rule.$el.find('.rule-value-container [name$=_3]').val()
+            obj['operator'] = rule.$el.find(`${rule.id}_operator`).val()
+            return obj
         },
         valueSetter: function (rule, value) {
           if (rule.operator.nb_inputs > 0) {
-            var val = value.split('.')
-            rule.$el.find('.rule-value-container [name$=_1]').val(val[0])// .trigger('change')
-            rule.$el.find('.rule-value-container [name$=_2]').val(val[1])// .trigger('change')
-            rule.$el.find('.rule-value-container [name$=_3]').val(val[2])
+            var val = value
+            /* let obj = {}
+            obj['value1'] = rule.$el.find('.rule-value-container [name$=_1]').val()
+            obj['value2'] = rule.$el.find('.rule-value-container [name$=_2]').val()
+            obj['value3'] = rule.$el.find('.rule-value-container [name$=_3]').val() */
+            rule.$el.find('.rule-value-container [name$=_1]').val(val.value1)// .trigger('change')
+            rule.$el.find('.rule-value-container [name$=_2]').val(val.value2)// .trigger('change')
+            rule.$el.find('.rule-value-container [name$=_3]').val(val.value3)
           }
         }
       }
@@ -147,6 +161,6 @@ $(document).ready(function() {
     if ($('#result').hasClass('hide')) 
       $('#result').removeClass('hide')
     // $('#result > pre').first().text(val)
-	$('#result > pre').first().append(JSON.stringify(result, null, 2))
+	$('#result > pre').first().text(JSON.stringify(result, null, 2))
   })
 })
