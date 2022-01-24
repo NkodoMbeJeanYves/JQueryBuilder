@@ -1,48 +1,24 @@
-$(document).ready(function() {
+const payload =
+  {
+    comportementaux: {},
+    marketings: {},
+    declaratifs: {}
+  }
+$(document).ready(function () {
   const options = {
     allow_empty: true,
     /* operators: [
-          'equal', 'not_equal', 'is_null',
-           { type: 'plus', optgroup: 'custom', nb_inputs: 1, multiple: false, apply_to: ['number', 'string'] },
-           { type: 'moins', optgroup: 'custom', nb_inputs: 1, multiple: false, apply_to: ['number', 'string'] },
-        ], */
+      'equal', 'not_equal', 'is_null',
+      { type: 'david', nb_inputs: 1, multiple: false, apply_to: ['number'] },
+      { type: 'less' || 'Moins de', nb_inputs: 1, multiple: false, apply_to: ['number'] }
+    ], */
     filters: [
       {
         type: 'string',
-        label: 'Firstname',
-        // optgroup: 'core',
-        default_value: 'expandis',
-        size: 30,
-        unique: true,
-        id: 'Firstname'
-      }, {
-        type: 'string',
-        label: 'Lastname',
-        // optgroup: 'core',
-        default_value: 'yves',
-        operators: ['equal', 'not_equal', 'in', 'not_in', 'is_null', 'is_not_null'],
-        size: 30,
-        unique: true,
-        id: 'LastName',
-        input_event: 'blur, focus, click'
-      }, {
-        id: 'category',
-        label: 'Category',
-        type: 'integer',
-        input: 'select',
-        values: {
-          1: 'Books',
-          2: 'Movies',
-          3: 'Music',
-          4: 'Tools',
-          5: 'Goodies',
-          6: 'Clothes'
-        }
-      }, {
-        type: 'string',
         id: 'code_action',
         field: 'sent',
-        label: 'a recu',
+        label: 'A recu',
+        operators: ['less', 'greater'],
         // values: {
         //   sent: 'a recu',
         //   clic_unique: 'a cliqué une fois',
@@ -52,36 +28,80 @@ $(document).ready(function() {
         //   hard: 'a bloqué hard'
         // },
         input: (rule, name) => {
-          const $container = rule.$el.find('.rule-value-container')
-          console.log(rule)
+          var $container = rule.$el.find('.rule-value-container')
+
+          $container.on('input', '[name$=_1]', function () {
+            if (!($(this).val()).trim()) {
+              $container.find('[name$=_2]')
+                .css('display', 'none').val(null)
+            } else {
+              $container.find('[name$=_2]')
+                .css('display', 'block')
+            }
+          })
+
+          $container.on('change', '[name$=_2]', function () {
+            const options = ['sms', 'emailing']
+            if (!options.includes($(this).val())) {
+              $container.find('[name$=_3]')
+                .css('display', 'none').val(null)
+            } else {
+              $container.find('[name$=_3]')
+                .css('display', 'block')
+            }
+          })
+
+          $container.on('change', '[name$=_3]', function () {
+            switch ($(this).val()) {
+              case 'sur les':
+                $container.find('.' + name + '_4')
+                  .css('display', 'block')
+                $container.find('[name$=_5]')
+                  .css('display', 'none').val(null)
+                break
+              case 'depuis le':
+                $container.find('[name$=_5]')
+                  .css('display', 'block')
+                $container.find('.' + name + '_4')
+                  .css('display', 'none').val(null)
+                break
+              default:
+                $container.find('.' + name + '_4')
+                  .css('display', 'none').val(null)
+                $container.find('[name$=_5]')
+                  .css('display', 'none').val(null)
+            }
+          })
           rule.data = { ...{ field: rule.filter.field } }
           return `
             <div class="col-12">
-                <input id="${name}_1" type="number" placeholder="" class="form-control" data-field="campaign_count" name="${name}_1" oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\\..*)\\./g, '$1')">
+                <input id="${name}_1" type="text" placeholder="" class="form-control" data-field="campaign_count" name="${name}_1" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                 <label for="${name}_1">campagnes</label>
             </div>
-            
-            <div class="col-md-4">
-            <label for="${name}_2">&nbsp;</label>
-                <select class="form-control" data-field="campaign_channel" name="${name}_2"> 
+            <div class="col-12">
+              <span>
+                <select class="form-control" data-field="campaign_channel" style="display:none" id="${name}_2" name="${name}_2"> 
                     <option value="null">-</option> 
                     <option value="sms">SMS</option> 
                     <option value="emailing">Emailing</option> 
-                    <option value="mail">Courrier</option>
                 </select>
-            </div>
-            <div class="col-md-4">
-                <label for="${name}_3">&nbsp;</label>
-                <select class="form-control" data-field="campaign_criteria" name="${name}_3" style="display:block;">
+              </span>
+              <span>
+                <select class="form-control" data-field="campaign_criteria" name="${name}_3" style="display:none;">
                     <option value="null">-</option> 
                     <option value="sur les">Sur les</option> 
-                    <option value="avant les">Avant les</option> 
+                    <option value="depuis le">Depuis le</option> 
                 </select>
+              </span>
+              <span>
+                <span><input type="text" class="form-control ${name}_4" style="display:none;" data-field="campaign_delay" name="${name}_4" oninput="this.value = this.value.replace(/[^0-9]/g, '')"></span>
+                <label for="${name}_4" class="form-label ${name}_4" style="display:none;">derniers jours</label>
+                <span><input type="date" class="form-control" style="display:none;" data-field="campaign_before_date" name="${name}_5"></span>
+              </span>
             </div>
-            <div class="col-md-4">
-                <label for="${name}_4" class="form-label">derniers jours</label>
-                <input type="number" class="form-control" data-field="campaign_delay" name="${name}_4" oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\\..*)\\./g, '$1')">
-            </div>
+            
+            
+            
             
         `
         },
@@ -91,6 +111,7 @@ $(document).ready(function() {
           obj[rule.$el.find('.rule-value-container [name$=_2]').data('field')] = rule.$el.find('.rule-value-container [name$=_2]').val()
           obj[rule.$el.find('.rule-value-container [name$=_3]').data('field')] = rule.$el.find('.rule-value-container [name$=_3]').val()
           obj[rule.$el.find('.rule-value-container [name$=_4]').data('field')] = rule.$el.find('.rule-value-container [name$=_4]').val()
+          obj[rule.$el.find('.rule-value-container [name$=_5]').data('field')] = rule.$el.find('.rule-value-container [name$=_5]').val()
           return obj
         },
         valueSetter: function (rule, value) {
@@ -99,112 +120,14 @@ $(document).ready(function() {
             rule.$el.find('.rule-value-container [name$=_2]').val(value[rule.$el.find('.rule-value-container [name$=_2]').data('field')])// .trigger('change')
             rule.$el.find('.rule-value-container [name$=_3]').val(value[rule.$el.find('.rule-value-container [name$=_3]').data('field')])
             rule.$el.find('.rule-value-container [name$=_4]').val(value[rule.$el.find('.rule-value-container [name$=_4]').data('field')])
-          }
-        }
-      }, {
-        type: 'string',
-        id: 'custom',
-        field: 'my-operator',
-        operators: ['equal', 'between'],
-        label: 'customLabel',
-        default_value: 'customValue',
-        input: function (rule, name) {
-          var $container = rule.$el.find('.rule-value-container')
-          // $rule.$el is the current li filter item whick contains rule-filter-container, rule-operator-container and rule-value-container
-          rule.data = { field1: 'value1', operator: rule.operator.type }
-          console.log(rule, name, rule.$el)
-          $container.on('change', '[name=' + name + '_1]', function () {
-            let h = ''
-            switch ($(this).val()) {
-              case 'A':
-                h = '<option value="-1">-</option> <option value="1">1</option> <option value="2">2</option>'
-                break
-              case 'B':
-                h = '<option value="-1">-</option> <option value="3">3</option> <option value="4">4</option>'
-                break
-              case 'C':
-                h = '<option value="-1">-</option> <option value="5">5</option> <option value="6">6</option>'
-                break
-            }
-
-            $container.find('[name$=_2]')
-              .html(h).css('display', 'block')
-              // .val('-1').trigger('change')
-              /* if(rule.$el.find('[name$=_2]').length === 0) {
-                rule.$el.append('<hr id="hr_1" class="hr_1">')
-                rule.$el.find('.hr_1').after(`<select name="${name}_2" style="display:block;">${h}</select>`).toggle(!!h).val('-1')
-              } else {
-                rule.$el.find('[name$=_2]').html(h).val('-1').css('display', 'block')
-              } */
-          })
-
-          $container.on('change', '[name$=_2]', function () {
-            let h = ''
-            switch ($(this).val()) {
-              case '1':
-                h = '<option value="-1">-</option> <option selected value="1">1</option> <option value="2">2</option>'
-                break
-              case '3':
-                h = '<option value="-1">-</option> <option value="3">3</option> <option value="4">4</option>'
-                break
-              case '5':
-                h = '<option value="-1">-</option> <option value="5">5</option> <option value="6">6</option>'
-                break
-            }
-
-            $container.find('[name=' + name + '_3]')
-              .html(h).css('display', 'block')
-              // .val('-1').trigger('change')
-            // rule.$el.find('.rule-filter-container').first().append(`<br><select name="${name}_2" style="display:block;">${h}</select>`)
-          })
-          return `
-            <div class="row">
-              <div class="col-md-4">
-                  <input type="number" class="form-control" data-field="campaign_count" name="${name}_1" oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\\..*)\\./g, '$1')">
-                  <select class="form-control" data-field="channel" name="${name}_2"> 
-                    <option value="null">-</option> 
-                    <option value="sms">SMS</option> 
-                    <option value="emailing">Emailing</option> 
-                    <option value="mail">Courrier</option>
-                  </select>
-              </div>
-              <div class="col-md-4">
-                  <select class="form-control" name="${name}_3" style="display:block;"></select>
-              </div>
-              <div class="col-md-4">
-                  <select class="form-control" name="${name}_4" style="display:block;"></select> 
-              </div>
-          </div>
-          `
-        },
-        valueGetter: function (rule) {
-          // return rule.$el.find('.rule-value-container [name$=_1]').val() +
-          // '.' + rule.$el.find('.rule-value-container [name$=_2]').val() +
-          // '.' + rule.$el.find('.rule-value-container [name$=_3]').val()
-          const obj = {}
-          obj.value1 = rule.$el.find('.rule-value-container [name$=_1]').val()
-          obj.value2 = rule.$el.find('.rule-value-container [name$=_2]').val()
-          obj.value3 = rule.$el.find('.rule-value-container [name$=_3]').val()
-
-          return obj
-        },
-        valueSetter: function (rule, value) {
-          if (rule.operator.nb_inputs > 0) {
-            var val = value
-            /* let obj = {}
-            obj['value1'] = rule.$el.find('.rule-value-container [name$=_1]').val()
-            obj['value2'] = rule.$el.find('.rule-value-container [name$=_2]').val()
-            obj['value3'] = rule.$el.find('.rule-value-container [name$=_3]').val() */
-            rule.$el.find('.rule-value-container [name$=_1]').val(val.value1)// .trigger('change')
-            rule.$el.find('.rule-value-container [name$=_2]').val(val.value2)// .trigger('change')
-            rule.$el.find('.rule-value-container [name$=_3]').val(val.value3)
+            rule.$el.find('.rule-value-container [name$=_5]').val(value[rule.$el.find('.rule-value-container [name$=_5]').data('field')])
           }
         }
       }
     ]
   }
 
-  $('#builder').queryBuilder(options)
+  $('#builder_m').queryBuilder(options)
   // var last_node_model = $('#builder').queryBuilder('getModel', $('#builder .rule-container').last())
 
   /* $('.parse-json').on('click', function () {
@@ -214,14 +137,15 @@ $(document).ready(function() {
       ))
     }) */
   $('.parse-json').on('click', function() {
-    var res = $('#builder').queryBuilder('getSQL', $(this).data('stmt'), false)
+    var res = $('#builder_m').queryBuilder('getSQL', $(this).data('stmt'), false)
     let val = res.sql + (res.params ? '\n\n' + JSON.stringify(res.params, undefined, 2) : '')
-    var result = $('#builder').queryBuilder('getRules');
+    var result = $('#builder_m').queryBuilder('getRules');
 
     if ($('#result').hasClass('hide')) {
       $('#result').removeClass('hide')
     }
-    // $('#result > pre').first().text(val)
-    $('#result > pre').first().text(JSON.stringify(result, null, 2))
+    //$('#result > pre').first().text(val)
+    // payload.marketings = JSON.stringify(result, null, 2)
+    $('#result > pre').first().text(JSON.stringify(result, null, 4))// (JSON.stringify(result, null, 2))
   })
 })
