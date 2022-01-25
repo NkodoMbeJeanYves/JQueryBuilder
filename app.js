@@ -15,7 +15,13 @@ $(document).ready(function() {
         default_value: 'expandis',
         size: 30,
         unique: true,
-        id: 'Firstname'
+        id: 'Firstname',
+        validation: {
+          format: /\d{3}/,
+          messages: {
+            format: 'format incorrect'
+          }
+        }
       }, {
         type: 'string',
         label: 'Lastname',
@@ -46,7 +52,7 @@ $(document).ready(function() {
         operators: ['equal', 'between'],
         label: 'customLabel',
         default_value: 'customValue',
-        
+
         input: function (rule, name) {
           var $container = rule.$el.find('.rule-value-container')
           // $rule.$el is the current li filter item whick contains rule-filter-container, rule-operator-container and rule-value-container

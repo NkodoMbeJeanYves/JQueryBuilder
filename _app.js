@@ -1,10 +1,3 @@
-const payload =
-  {
-    comportementaux: {},
-    marketings: {},
-    declaratifs: {}
-  }
-
 $(document).ready(function () {
   const options = {
     allow_empty: true,
@@ -15,56 +8,46 @@ $(document).ready(function () {
         field: 'sent',
         label: 'A recu',
         operators: ['less', 'greater'],
+        validation: {
+          callback: (value, rule) => {
+            const errors = []
+            const $container = rule.$el.find('.rule-value-container')
+            // campaign_count
+            const campaignCountElement = $container.find('[name$=_1]')
+            if (!(campaignCountElement.val()).trim()) {
+              errors.push('The campaign count field is required')
+              rule.data.validationErrors = errors
+              return 'The campaign count field is required'
+            }
+
+            // campaign_type
+            const campaignTypeElement = $container.find('[name$=_2]')
+            if (!(campaignTypeElement.val()).trim()) {
+              errors.push('The campaign Type field is required')
+              rule.data.validationErrors = errors
+              return 'The campaign Type field is required'
+            }
+
+            const campaignCriteriaElement = $container.find('[name$=_3]')
+            if ((campaignCriteriaElement.val()).includes('sur les') && !($container.find('[name$=_4]').val()).trim()) {
+              errors.push('The campaign delay field is required')
+              rule.data.validationErrors = errors
+              return 'The campaign delay field is required'
+            }
+
+            if ((campaignCriteriaElement.val()).includes('depuis le') && !($container.find('[name$=_5]').val()).trim()) {
+              errors.push('The campaign date delay field is required')
+              rule.data.validationErrors = errors
+              return 'The campaign date delay field is required'
+            }
+            return true
+          }
+        },
         input: (rule, name) => {
           const operatorsContainer = rule.$el.find('.rule-operator-container')
           const options = operatorsContainer.children().first().children('option')
           $(options[0]).text('Moins de')
           $(options[1]).text('Plus de')
-
-          var $container = rule.$el.find('.rule-value-container')
-
-          $container.on('input', '[name$=_1]', function () {
-            if (!($(this).val()).trim()) {
-              $container.find('[name$=_2]')
-                .css('display', 'none').val(null).change()
-            } else {
-              $container.find('[name$=_2]')
-                .css('display', 'block')
-            }
-          })
-
-          $container.on('change', '[name$=_2]', function () {
-            const options = ['sms', 'emailing']
-            if (!options.includes($(this).val())) {
-              $container.find('[name$=_3]')
-                .css('display', 'none').val(null).change()
-            } else {
-              $container.find('[name$=_3]')
-                .css('display', 'block')
-            }
-          })
-
-          $container.on('change', '[name$=_3]', function () {
-            switch ($(this).val()) {
-              case 'sur les':
-                $container.find('.' + name + '_4')
-                  .css('display', 'block')
-                $container.find('[name$=_5]')
-                  .css('display', 'none').val(null)
-                break
-              case 'depuis le':
-                $container.find('[name$=_5]')
-                  .css('display', 'block')
-                $container.find('.' + name + '_4')
-                  .css('display', 'none').val(null)
-                break
-              case 'null':
-                $container.find('.' + name + '_4')
-                  .css('display', 'none').val(null)
-                $container.find('[name$=_5]')
-                  .css('display', 'none').val(null)
-            }
-          })
           rule.data = { ...{ field: rule.filter.field } }
           return `
             <div class="col-12">
@@ -73,29 +56,23 @@ $(document).ready(function () {
             </div>
             <div class="col-12">
               <span>
-                <select class="form-control" data-field="campaign_channel" style="display:none" id="${name}_2" name="${name}_2"> 
-                    <option value="null">-</option> 
-                    <option value="sms">SMS</option> 
-                    <option value="emailing">Emailing</option> 
+                <select class="form-control" data-field="campaign_channel" style="display:block" id="${name}_2" name="${name}_2"> 
+                  <option value="emailing">Emailing</option> 
+                  <option value="sms">SMS</option> 
                 </select>
               </span>
               <span>
-                <select class="form-control" data-field="campaign_criteria" name="${name}_3" style="display:none;">
-                    <option value="null">-</option> 
-                    <option value="sur les">Sur les</option> 
+                <select class="form-control" data-field="campaign_criteria" name="${name}_3" style="display:block;"> 
+                    <option value="sur les" selected>Sur les</option> 
                     <option value="depuis le">Depuis le</option> 
                 </select>
               </span>
               <span>
-                <span><input type="text" class="form-control ${name}_4" style="display:none;" data-field="campaign_delay" name="${name}_4" oninput="this.value = this.value.replace(/[^0-9]/g, '')"></span>
-                <label for="${name}_4" class="form-label ${name}_4" style="display:none;">derniers jours</label>
-                <span><input type="date" class="form-control" style="display:none;" data-field="campaign_before_date" name="${name}_5"></span>
+                <span><input type="text" class="form-control ${name}_4" style="display:block;" data-field="campaign_delay" name="${name}_4" oninput="this.value = this.value.replace(/[^0-9]/g, '')"></span>
+                <label for="${name}_4" class="form-label ${name}_4" style="display:block;">derniers jours</label>
+                <span><input type="date" class="form-control" style="display:block;" data-field="campaign_before_date" name="${name}_5"></span>
               </span>
-            </div>
-            
-            
-            
-            
+            </div> 
         `
         },
         valueGetter: function (rule) {
@@ -120,6 +97,7 @@ $(document).ready(function () {
     ]
   }
 
+  // $('#builder_m').queryBuilder(options).validate()
   $('#builder_m').queryBuilder(options)
 
   $('.parse-json').on('click', function () {
@@ -130,7 +108,12 @@ $(document).ready(function () {
     if ($('#result').hasClass('hide')) {
       $('#result').removeClass('hide')
     }
-    //$('#result > pre').first().text(val)
-    $('#result > pre').first().text(JSON.stringify(result, null, 4))
+
+    $('#result > pre').first().text(val)
+    // $('#result > pre').first().text(JSON.stringify(result, null, 4))
+  })
+
+  $('.reset').on('click', function () {
+    $('#builder_m').queryBuilder('reset')
   })
 })
