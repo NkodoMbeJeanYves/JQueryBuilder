@@ -4,14 +4,10 @@ const payload =
     marketings: {},
     declaratifs: {}
   }
+
 $(document).ready(function () {
   const options = {
     allow_empty: true,
-    /* operators: [
-      'equal', 'not_equal', 'is_null',
-      { type: 'david', nb_inputs: 1, multiple: false, apply_to: ['number'] },
-      { type: 'less' || 'Moins de', nb_inputs: 1, multiple: false, apply_to: ['number'] }
-    ], */
     filters: [
       {
         type: 'string',
@@ -19,14 +15,6 @@ $(document).ready(function () {
         field: 'sent',
         label: 'A recu',
         operators: ['less', 'greater'],
-        // values: {
-        //   sent: 'a recu',
-        //   clic_unique: 'a cliqué une fois',
-        //   clic: 'a cliqué à maintes reprises',
-        //   open: 'a ouvert',
-        //   soft: 'a bloqué soft',
-        //   hard: 'a bloqué hard'
-        // },
         input: (rule, name) => {
           const operatorsContainer = rule.$el.find('.rule-operator-container')
           const options = operatorsContainer.children().first().children('option')
@@ -38,7 +26,7 @@ $(document).ready(function () {
           $container.on('input', '[name$=_1]', function () {
             if (!($(this).val()).trim()) {
               $container.find('[name$=_2]')
-                .css('display', 'none').val(null)
+                .css('display', 'none').val(null).change()
             } else {
               $container.find('[name$=_2]')
                 .css('display', 'block')
@@ -49,7 +37,7 @@ $(document).ready(function () {
             const options = ['sms', 'emailing']
             if (!options.includes($(this).val())) {
               $container.find('[name$=_3]')
-                .css('display', 'none').val(null)
+                .css('display', 'none').val(null).change()
             } else {
               $container.find('[name$=_3]')
                 .css('display', 'block')
@@ -70,7 +58,7 @@ $(document).ready(function () {
                 $container.find('.' + name + '_4')
                   .css('display', 'none').val(null)
                 break
-              default:
+              case 'null':
                 $container.find('.' + name + '_4')
                   .css('display', 'none').val(null)
                 $container.find('[name$=_5]')
@@ -133,15 +121,8 @@ $(document).ready(function () {
   }
 
   $('#builder_m').queryBuilder(options)
-  // var last_node_model = $('#builder').queryBuilder('getModel', $('#builder .rule-container').last())
 
-  /* $('.parse-json').on('click', function () {
-      console.log(JSON.stringify(
-        $('#builder').queryBuilder('getMongo'),
-        undefined, 2
-      ))
-    }) */
-  $('.parse-json').on('click', function() {
+  $('.parse-json').on('click', function () {
     var res = $('#builder_m').queryBuilder('getSQL', $(this).data('stmt'), false)
     let val = res.sql + (res.params ? '\n\n' + JSON.stringify(res.params, undefined, 2) : '')
     var result = $('#builder_m').queryBuilder('getRules');
@@ -150,7 +131,6 @@ $(document).ready(function () {
       $('#result').removeClass('hide')
     }
     //$('#result > pre').first().text(val)
-    // payload.marketings = JSON.stringify(result, null, 2)
-    $('#result > pre').first().text(JSON.stringify(result, null, 4))// (JSON.stringify(result, null, 2))
+    $('#result > pre').first().text(JSON.stringify(result, null, 4))
   })
 })
