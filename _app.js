@@ -28,6 +28,11 @@ $(document).ready(function () {
         //   hard: 'a bloqué hard'
         // },
         input: (rule, name) => {
+          const operatorsContainer = rule.$el.find('.rule-operator-container')
+          const options = operatorsContainer.children().first().children('option')
+          $(options[0]).text('Moins de')
+          $(options[1]).text('Plus de')
+
           var $container = rule.$el.find('.rule-value-container')
 
           $container.on('input', '[name$=_1]', function () {
