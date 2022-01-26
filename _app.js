@@ -16,30 +16,26 @@ $(document).ready(function () {
             buildersErrorMessages.marketing = ''
             // campaign_count
             const campaignCountElement = $container.find('[name$=_1]')
-            if (!(campaignCountElement.val()).trim()) {
+            if (!(campaignCountElement.val())?.trim()) {
               buildersErrorMessages.marketing = 'The campaign count field is required'
-              rule.data.validationErrors = buildersErrorMessages.marketing
               return 'The campaign count field is required'
             }
 
             // campaign_type
             const campaignTypeElement = $container.find('[name$=_2]')
-            if (!(campaignTypeElement.val()).trim()) {
+            if (!(campaignTypeElement.val())?.trim()) {
               buildersErrorMessages.marketing = 'The campaign Type field is required'
-              rule.data.validationErrors = buildersErrorMessages.marketing
               return 'The campaign Type field is required'
             }
 
             const campaignCriteriaElement = $container.find('[name$=_3]')
-            if ((campaignCriteriaElement.val()).includes('sur les') && !($container.find('[name$=_4]').val()).trim()) {
+            if ((campaignCriteriaElement.val())?.includes('sur les') && !($container.find('[name$=_4]').val()).trim()) {
               buildersErrorMessages.marketing = 'The campaign delay field is required'
-              rule.data.validationErrors = buildersErrorMessages.marketing
               return 'The campaign delay field is required'
             }
 
-            if ((campaignCriteriaElement.val()).includes('depuis le') && !($container.find('[name$=_5]').val()).trim()) {
+            if ((campaignCriteriaElement.val())?.includes('depuis le') && !($container.find('[name$=_5]').val()).trim()) {
               buildersErrorMessages.marketing = 'The campaign date delay field is required'
-              rule.data.validationErrors = buildersErrorMessages.marketing
               return 'The campaign date delay field is required'
             }
             return true
@@ -107,7 +103,7 @@ $(document).ready(function () {
     let val = res.sql + (res.params ? '\n\n' + JSON.stringify(res.params, undefined, 2) : '')
     var result = $('#builder_m').queryBuilder('getRules');
     // display current builder error message
-    if (!buildersErrorMessages.marketing.trim()) { // there is an error
+    if (!buildersErrorMessages.marketing?.trim()) { // there is an error
       $('#builder_m_error').css('display', 'none').text('')
     } else {
       $('#builder_m_error').css('display', 'block').text(`${buildersErrorMessages.marketing}`)
