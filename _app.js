@@ -1,43 +1,45 @@
+const buildersErrorMessages = {}
 $(document).ready(function () {
   const options = {
-    allow_empty: true,
+    allow_empty: false,
     filters: [
       {
         type: 'string',
         id: 'code_action',
         field: 'sent',
         label: 'A recu',
+        placeholder: 'exemple: 3',
         operators: ['less', 'greater'],
         validation: {
           callback: (value, rule) => {
-            const errors = []
             const $container = rule.$el.find('.rule-value-container')
+            buildersErrorMessages.marketing = ''
             // campaign_count
             const campaignCountElement = $container.find('[name$=_1]')
             if (!(campaignCountElement.val()).trim()) {
-              errors.push('The campaign count field is required')
-              rule.data.validationErrors = errors
+              buildersErrorMessages.marketing = 'The campaign count field is required'
+              rule.data.validationErrors = buildersErrorMessages.marketing
               return 'The campaign count field is required'
             }
 
             // campaign_type
             const campaignTypeElement = $container.find('[name$=_2]')
             if (!(campaignTypeElement.val()).trim()) {
-              errors.push('The campaign Type field is required')
-              rule.data.validationErrors = errors
+              buildersErrorMessages.marketing = 'The campaign Type field is required'
+              rule.data.validationErrors = buildersErrorMessages.marketing
               return 'The campaign Type field is required'
             }
 
             const campaignCriteriaElement = $container.find('[name$=_3]')
             if ((campaignCriteriaElement.val()).includes('sur les') && !($container.find('[name$=_4]').val()).trim()) {
-              errors.push('The campaign delay field is required')
-              rule.data.validationErrors = errors
+              buildersErrorMessages.marketing = 'The campaign delay field is required'
+              rule.data.validationErrors = buildersErrorMessages.marketing
               return 'The campaign delay field is required'
             }
 
             if ((campaignCriteriaElement.val()).includes('depuis le') && !($container.find('[name$=_5]').val()).trim()) {
-              errors.push('The campaign date delay field is required')
-              rule.data.validationErrors = errors
+              buildersErrorMessages.marketing = 'The campaign date delay field is required'
+              rule.data.validationErrors = buildersErrorMessages.marketing
               return 'The campaign date delay field is required'
             }
             return true
@@ -51,7 +53,7 @@ $(document).ready(function () {
           rule.data = { ...{ field: rule.filter.field } }
           return `
             <div class="col-12">
-                <input id="${name}_1" type="text" placeholder="" class="form-control" data-field="campaign_count" name="${name}_1" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                <input id="${name}_1" type="text" placeholder="Exemple: 3" class="form-control" data-field="campaign_count" name="${name}_1" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                 <label for="${name}_1">campagnes</label>
             </div>
             <div class="col-12">
@@ -68,7 +70,7 @@ $(document).ready(function () {
                 </select>
               </span>
               <span>
-                <span><input type="text" class="form-control ${name}_4" style="display:block;" data-field="campaign_delay" name="${name}_4" oninput="this.value = this.value.replace(/[^0-9]/g, '')"></span>
+                <span><input type="text" class="form-control ${name}_4" style="display:block;" placeholder="Exemple: 4" data-field="campaign_delay" name="${name}_4" oninput="this.value = this.value.replace(/[^0-9]/g, '')"></span>
                 <label for="${name}_4" class="form-label ${name}_4" style="display:block;">derniers jours</label>
                 <span><input type="date" class="form-control" style="display:block;" data-field="campaign_before_date" name="${name}_5"></span>
               </span>
@@ -104,6 +106,12 @@ $(document).ready(function () {
     var res = $('#builder_m').queryBuilder('getSQL', $(this).data('stmt'), false)
     let val = res.sql + (res.params ? '\n\n' + JSON.stringify(res.params, undefined, 2) : '')
     var result = $('#builder_m').queryBuilder('getRules');
+    // display current builder error message
+    if (!buildersErrorMessages.marketing.trim()) { // there is an error
+      $('#builder_m_error').css('display', 'none').text('')
+    } else {
+      $('#builder_m_error').css('display', 'block').text(`${buildersErrorMessages.marketing}`)
+    }
 
     if ($('#result').hasClass('hide')) {
       $('#result').removeClass('hide')
